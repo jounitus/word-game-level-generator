@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+
+<style>
+
+body {
+    font-size: 20px;
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+    color: #555;
+}
+
+.map {
+    position: relative;
+
+}
+
+.word {
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    font-weight: bold;
+}
+
+</style>
+
+<p>This is a simple tester to preview generated levels</p>
+<p>You can view full level object on "Network" tab inside Developer Tools</p>
+<p>Levels are loaded from <a href="/v1/generate-level">/v1/generate-level</a></p>
+
+<div id="app">
+    <div class="map">
+        <div class="word" v-bind:style="{ left: word[0][0] + 'em', top: word[0][1] + 'em' }" v-for="word in level.map">
+          {{ word[1].toUpperCase() }}
+        </div>
+    </div>
+</div>
+
+<script>
+var app = new Vue({
+  el: '#app',
+  data: { level: {} },
+  created() {
+
+    fetch("/v1/generate-level")
+        .then(response => response.json())
+        .then(json => this.level = json);
+
+
+  }
+})
+</script>
+
+</body>
+</html>
