@@ -1,4 +1,5 @@
 (ns generator.server
+  (:gen-class)
   (:require
     [org.httpkit.server :refer :all]
     [generator.core :refer :all]
@@ -10,26 +11,31 @@
     )
   )
 
-(println "Loading words...")
-
 (defn split-all-words
   [words]
   (map split-word words)
 )
 
-(def filename "../../resources/google-10000-english-no-swears.txt")
-(def words (filter test-great-word (read-lines-from-file filename)))
-(def short-code-and-words-list
-  (map (fn [[short-code words]] [short-code (split-all-words words)])
-    (filter (fn [[short-code words]] (>= (count words) 5))
-      (get-longer-short-code-and-words-list words 5)
-    )
+(defn get-server-short-code-and-words-list
+  []
+  (let
+    [
+      filename "./resources/google-10000-english-no-swears.txt"
+      words (filter test-great-word (read-lines-from-file filename))
+      short-code-and-words-list
+        (map (fn [[short-code words]] [short-code (split-all-words words)])
+          (filter (fn [[short-code words]] (>= (count words) 5))
+            (get-longer-short-code-and-words-list words 5)
+          )
+        )
+    ]
+    short-code-and-words-list
   )
+
 )
 
-(println "Done loading words.")
-
-(defn app [req]
+(defn generate-level
+  [req short-code-and-words-list]
   (let
     [
       [short-code split-words] (rand-nth short-code-and-words-list)
@@ -37,18 +43,25 @@
       level (try-build-level split-words)
       level (clean-level level)
     ]
-    {:status  200
-     :headers {"Content-Type" "application/json"}
-     :body    (generate-string level)
+    {
+      :status  200
+      :headers {"Content-Type" "application/json"}
+      :body    (generate-string level)
     }
   )
 )
 
-(println "Server now running")
-
-(defroutes all-routes
-  (GET "/v1/generate-level" [] app) ;; asynchronous(long polling)
-  (route/resources "/") ;; static file url prefix /static, in `public` folder
-  (route/not-found "<p>Page not found.</p>")) ;; all other, return 404
-
-(run-server all-routes {:port 8080})
+(defn -main [& args]
+  (println "Reading words...")
+  (let
+    [
+      short-code-and-words-list (get-server-short-code-and-words-list)
+      all-routes (routes
+        (GET "/v1/generate-level" [] (fn [req] (generate-level req short-code-and-words-list)))
+        (route/resources "/") ;; static file url prefix /static, in `public` folder
+        (route/not-found "<p>Page not found.</p>")) ;; all other, return 404
+    ]
+    (println "Server running")
+    (run-server all-routes {:port 8080})
+  )
+)
