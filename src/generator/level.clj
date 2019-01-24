@@ -220,16 +220,13 @@
   )
   (
   [m horizontal? split-word]
-   (doall
-     (sort by-score
-       (apply concat ; flatten results one level
-         (map
-           (fn [n] (try-fit-single-word m horizontal? n split-word))
-           (range (count split-word))
-         )
-       )
-     )
-   )
+    (doall
+      (->> (range (count split-word))
+           (map #(try-fit-single-word m horizontal? % split-word))
+           (apply concat) ; flatten results one level
+           (sort by-score)
+      )
+    )
   )
 )
 

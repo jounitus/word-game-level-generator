@@ -15,15 +15,9 @@
   all the unique letters in the words that are in the second tuple value.
   The second tuple value can contain multiple wods"
   [words]
-  (let
-    [
-      short-code-and-word (map #(vec [(set %) %]) words) ; ([#{\a \b} "abba"] [#{\a \b \h \t} "abbath"])
-      short-code-map (tuple-vector-to-map short-code-and-word)
-      short-code-list (map identity short-code-map) ; convert map to list of (key value) tuples
-    ]
-
-    short-code-list
-
+  (->> (map #(vec [(set %) %]) words) ; ([#{\a \b} "abba"] [#{\a \b \h \t} "abbath"])
+       (tuple-vector-to-map)
+       (map identity) ; convert map to list of (key value) tuples
   )
 )
 
@@ -51,14 +45,10 @@
   "
 
   [short-code-to-short-codes-list short-code-and-words-list]
-  (let
-    [
-      longer-short-code-and-words-list
-        (for [[short-code short-codes] short-code-to-short-codes-list]
-          [short-code (find-and-merge-words (set short-codes) short-code-and-words-list)]
-        )
-    ]
-    (sort (fn [[akey aval], [bkey bval]] (compare (count bval) (count aval))) longer-short-code-and-words-list)
+
+  (->> (for [[short-code short-codes] short-code-to-short-codes-list]
+          [short-code (find-and-merge-words (set short-codes) short-code-and-words-list)])
+       (sort (fn [[akey aval], [bkey bval]] (compare (count bval) (count aval))))
   )
 
 )
@@ -71,7 +61,7 @@
   and the word list is huge and contain seemingly random words
   "
 
-  [words max-short-code-length]
+  [max-short-code-length words]
   (let
     [
 

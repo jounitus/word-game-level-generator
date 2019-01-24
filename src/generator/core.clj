@@ -40,18 +40,14 @@
 (defn find-and-merge-words
   "find all the words that match the short-codes and builds combined short-code from those words"
   [short-codes l]
-  (set
-    (flatten
-      (map second
-        (filter
-          (fn [[short-code words]]
-            (contains? short-codes short-code)
-          )
-          l
-        )
-      )
-    )
-  )
+
+  (->> l
+       (filter (fn [[short-code words]] (contains? short-codes short-code)))
+       (map second)
+       (flatten)
+       (set)
+       )
+
 )
 
 (defn subtract-collection

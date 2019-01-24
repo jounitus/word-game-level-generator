@@ -113,7 +113,7 @@
         [#{\m \o \t} #{"moot"}]
         ]
     ]
-    (is (= (get-longer-short-code-and-words-list l 7) result))
+    (is (= (get-longer-short-code-and-words-list 7 l) result))
   )
 )
 
