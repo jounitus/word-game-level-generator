@@ -1,5 +1,4 @@
-(ns generator.core
-  (:require [clojure.string :as str]))
+(ns generator.core)
 
 
 (defn test-great-word
@@ -13,11 +12,6 @@
   [filename]
   (with-open [rdr (clojure.java.io/reader filename)]
      (doall (line-seq rdr))))
-
-(defn split-word
-  "splits word into a letter vector"
-  [word]
-  (str/split word #""))
 
 (defn find-matching-short-codes
   "find which 'short-codes' partially match 'short-code'

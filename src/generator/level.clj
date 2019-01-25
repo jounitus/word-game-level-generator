@@ -58,16 +58,16 @@
 (defn grid-get-coordinates
   "returns coordinates where the letters can be plotted on the map"
   (
-    [[x y] [x-mul y-mul] split-word]
+    [[x y] [x-mul y-mul] word]
 
     (into {}
 
-      (for [n (range(count split-word)) :let [
+      (for [n (range(count word)) :let [
 
         cur-x (+ x (* n x-mul))
         cur-y (+ y (* n y-mul))
 
-        letter (get split-word n)]]
+        letter (get word n)]]
 
         [[cur-x cur-y] letter]
 
@@ -75,12 +75,12 @@
     )
   )
   (
-    [position horizontal? offset split-word]
+    [position horizontal? offset word]
 
     (grid-get-coordinates
       (normalize-coordinate position horizontal? (+ offset 1)) ; compensate offset because of the NO_GO
       (get-multipliers-for-direction horizontal?)
-      (vec (concat [NO_GO] split-word [NO_GO]))
+      (vec (concat [NO_GO] word [NO_GO]))
     )
 
   )
@@ -188,41 +188,41 @@
   "Tries to insert a word to the map every possible way.
   Returns the best match according to amount of letters that this word matches on the map"
   (
-  [m horizontal? offset coordinate split-word]
+  [m horizontal? offset coordinate word]
     (let [
-      coordinates (grid-get-coordinates coordinate horizontal? offset split-word)
+      coordinates (grid-get-coordinates coordinate horizontal? offset word)
       coordinates-with-match-score (get-coordinates-with-match-score m coordinates)
       matching-coordinates (get-matching-coordinates coordinates-with-match-score)
       ]
-      ;(prn "try-fit-single-word 3" score coordinate horizontal? offset split-word)
+      ;(prn "try-fit-single-word 3" score coordinate horizontal? offset word)
       {
         :matching-coordinates matching-coordinates
         :coordinate (normalize-coordinate coordinate horizontal? offset)
         :coordinates coordinates
         ;:horizontal? horizontal?
         ;:offset offset
-        ;:split-word split-word
+        ;:word word
       }
     )
   )
   (
-  [m horizontal? offset split-word]
+  [m horizontal? offset word]
 
     (doall
       (map
         (fn [coordinate]
-          (try-fit-single-word m horizontal? offset coordinate split-word)
+          (try-fit-single-word m horizontal? offset coordinate word)
         )
-        (get-valid-coordinates-for-letter m (get split-word offset) horizontal?)
+        (get-valid-coordinates-for-letter m (get word offset) horizontal?)
       )
     )
 
   )
   (
-  [m horizontal? split-word]
+  [m horizontal? word]
     (doall
-      (->> (range (count split-word))
-           (map #(try-fit-single-word m horizontal? % split-word))
+      (->> (range (count word))
+           (map #(try-fit-single-word m horizontal? % word))
            (apply concat) ; flatten results one level
            (sort by-score)
       )
@@ -235,14 +235,14 @@
 (defn try-build-level
   "try building a level based on all the words provided"
   (
-    [n split-words result]
+    [n words result]
     (let [
-          split-word (first split-words)
+          word (first words)
           horizontal? (even? n)
-          try-fit-result (first (try-fit-single-word (:map result) horizontal? split-word))
+          try-fit-result (first (try-fit-single-word (:map result) horizontal? word))
           ]
       (cond
-        (= 0 (count split-words))
+        (= 0 (count words))
           (do (prn "finished!") result)
         (nil? (:matching-coordinates try-fit-result))
           (do (prn "no matching coordinates!") result)
@@ -251,7 +251,7 @@
             [
               result (update-in result [:map] merge (:coordinates try-fit-result))
               result (update-in result [:words] conj {
-                :word split-word
+                :word word
                 :coordinate (:coordinate try-fit-result)
                 :horizontal? horizontal?
               })
@@ -259,9 +259,9 @@
             ]
 
             (do
-              (prn "try-build-level" split-word n horizontal? try-fit-result result)
+              (prn "try-build-level" word n horizontal? try-fit-result result)
 
-              (recur (inc n) (rest split-words) result)
+              (recur (inc n) (rest words) result)
             )
           )
       )
@@ -269,17 +269,17 @@
   )
 
   (
-    [split-words]
+    [words]
     (let [result {
-      :map (grid-get-coordinates [0, 0] true 0 (first split-words))
+      :map (grid-get-coordinates [0, 0] true 0 (first words))
       :matching-coordinates #{}
       :words [{
-                :word (first split-words)
+                :word (first words)
                 :coordinate [0, 0]
                 :horizontal? true
               }]
       }]
-      (try-build-level 1 (rest split-words) result)
+      (try-build-level 1 (rest words) result)
     )
   )
 )
@@ -291,18 +291,16 @@
 )
 
 (defn fix-and-clean-word
-  "join splitted for and 'normalize' the coordinates based on the offset parameter"
+  "'normalize' the coordinates based on the offset parameter"
   [word, offset]
   (assoc word
-    :word (clojure.string/join (:word word))
     :coordinate (op2d - (:coordinate word) offset)
   )
 )
 
 (defn clean-level
   "Normalize all coordinates, so that min x and min y coordinates are always 0.
-  Also change map coordinates, so that it converts better into a json array.
-  Also join all the split words together"
+  Also change map coordinates, so that it converts better into a json array."
   [level]
   (let
     [

@@ -8,11 +8,6 @@
   (is (= (test-great-word "boo") false)) ; too short
 )
 
-(deftest split-word-test
-  (let [param "concurrent"
-        result '("c" "o" "n" "c" "u" "r" "r" "e" "n" "t")]
-    (is (= (split-word param) result)))
-  )
 
 (deftest read-lines-from-file-test
   (let [filename "../../resources/google-10000-english-no-swears.txt"]

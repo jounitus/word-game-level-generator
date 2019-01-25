@@ -215,28 +215,28 @@
 
 (deftest try-build-level-test
 
-  (let [split-words (vec (map split-word
+  (let [words
     ["else" "sale" "ease" "sell" "lease" "sees" "less" "seal" "sales" "assess" "sells" "seas"]
-    ))]
+    ]
 
-    (prn split-words)
+    (prn words)
     (let [
-      result (try-build-level split-words)
+      result (try-build-level words)
       expected-map {
-        [2 -2] "e", [2 2] "l", [0 0] "e", [2 -1] "#", [1 0] "l", [2 3] "l", [7 2] "#",
-        [0 -4] "#", [0 -2] "a", [-1 0] "#", [6 3] "s", [3 -2] "#", [4 2] "a",
-        [3 0] "e", [0 -3] "s", [6 -1] "#", [5 2] "s", [-1 -2] "e", [6 4] "#",
-        [6 1] "e", [2 4] "#", [2 0] "s", [2 1] "e", [0 -1] "l", [6 2] "e", [6 0] "s",
-         [1 2] "#", [1 -2] "s", [3 2] "e", [0 1] "#", [-2 -2] "#", [4 0] "#"
+        [2 -2] \e, [2 2] \l, [0 0] \e, [2 -1] "#", [1 0] \l, [2 3] \l, [7 2] "#",
+        [0 -4] "#", [0 -2] \a, [-1 0] "#", [6 3] \s, [3 -2] "#", [4 2] \a,
+        [3 0] \e, [0 -3] \s, [6 -1] "#", [5 2] \s, [-1 -2] \e, [6 4] "#",
+        [6 1] \e, [2 4] "#", [2 0] \s, [2 1] \e, [0 -1] \l, [6 2] \e, [6 0] \s,
+         [1 2] "#", [1 -2] \s, [3 2] \e, [0 1] "#", [-2 -2] "#", [4 0] "#"
       }
       expected-matching-coordinates #{[0 0] [0 -2] [2 0] [2 2] [6 2]}
       expected-words [
-        {:word ["e" "l" "s" "e"], :coordinate [0 0], :horizontal? true}
-        {:word ["s" "a" "l" "e"], :coordinate [0 -3], :horizontal? false}
-        {:word ["e" "a" "s" "e"], :coordinate [-1 -2], :horizontal? true}
-        {:word ["s" "e" "l" "l"], :coordinate [2 0], :horizontal? false}
-        {:word ["l" "e" "a" "s" "e"], :coordinate [2 2], :horizontal? true}
-        {:word ["s" "e" "e" "s"], :coordinate [6 0], :horizontal? false}
+        {:word "else", :coordinate [0 0], :horizontal? true}
+        {:word "sale", :coordinate [0 -3], :horizontal? false}
+        {:word "ease", :coordinate [-1 -2], :horizontal? true}
+        {:word "sell", :coordinate [2 0], :horizontal? false}
+        {:word "lease", :coordinate [2 2], :horizontal? true}
+        {:word "sees", :coordinate [6 0], :horizontal? false}
         ]
       ]
       (is (= (get result :map) expected-map))
@@ -257,19 +257,19 @@
 
 (deftest clean-level-test
 
-  (let [split-words (vec (map split-word
+  (let [words
     ["else" "sale" "ease" "sell" "lease" "sees" "less" "seal" "sales" "assess" "sells" "seas"]
-    ))]
+    ]
 
-    (prn split-words)
+    (prn words)
     (let [
-      result (clean-level (try-build-level split-words))
+      result (clean-level (try-build-level words))
       result-coordinates (map first (:map result))
       expected-map [
-        [[3 1] "e"] [[3 5] "l"] [[1 3] "e"] [[2 3] "l"] [[3 6] "l"] [[1 1] "a"]
-        [[7 6] "s"] [[5 5] "a"] [[4 3] "e"] [[1 0] "s"] [[6 5] "s"] [[0 1] "e"]
-        [[7 4] "e"] [[3 3] "s"] [[3 4] "e"] [[1 2] "l"] [[7 5] "e"] [[7 3] "s"]
-        [[2 1] "s"] [[4 5] "e"]
+        [[3 1] \e] [[3 5] \l] [[1 3] \e] [[2 3] \l] [[3 6] \l] [[1 1] \a]
+        [[7 6] \s] [[5 5] \a] [[4 3] \e] [[1 0] \s] [[6 5] \s] [[0 1] \e]
+        [[7 4] \e] [[3 3] \s] [[3 4] \e] [[1 2] \l] [[7 5] \e] [[7 3] \s]
+        [[2 1] \s] [[4 5] \e]
       ]
       expected-matching-coordinates [[3 5] [1 3] [1 1] [3 3] [7 5]]
       expected-words [

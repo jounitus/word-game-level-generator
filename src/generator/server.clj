@@ -11,11 +11,6 @@
     )
   )
 
-(defn split-all-words
-  [words]
-  (map split-word words)
-)
-
 (defn get-server-short-code-and-words-list
   [filename]
 
@@ -24,7 +19,6 @@
        (filter test-great-word)
        (get-longer-short-code-and-words-list 5)
        (filter (fn [[short-code words]] (>= (count words) 5)))
-       (map (fn [[short-code words]] [short-code (split-all-words words)]))
        )
 
 )
